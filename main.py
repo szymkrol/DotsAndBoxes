@@ -2,7 +2,7 @@ import dots
 from minmax import *
 from mcts import *
 from fastapi import FastAPI, Query, Body
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 def return_board(board: List[List[int]], alg: str = None, move: tuple = None, iter_mcts: float = float('+inf'),
@@ -49,11 +49,11 @@ def get_board(
     depth_minmax: Optional[int] = Query(None),
     ab: bool = Query(True),
     player: str = Query("human")
-):
+) -> Dict[str, Any]:
     return return_board(board, alg, tuple(move), iter_mcts, time_mcts, depth_minmax, ab, player)
 
 
 @app.get("/reset")
-def get_clean_board(size: int = Query(...)):
+def get_clean_board(size: int = Query(...)) -> Dict[str, Any]:
     game = dots.DotsAndBoxes(size)
     return {"board": game.board, "score": game.get_score()}
