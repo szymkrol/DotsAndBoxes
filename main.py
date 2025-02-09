@@ -1,77 +1,64 @@
 import dots
 from minmax import *
-import math
-import random
 from mcts import *
+from fastapi import FastAPI, Query, Body
+from typing import List, Optional
 
 
-def play_first_mcts(game, no, c):
-    # ujemna punktacja - dla komputera
-    while game.get_available_moves():
-        while game.get_available_moves():
-            game.print_nice_board()
-            mv1_x = int(input())
-            mv1_y = int(input())
-            code = game.edge_play((mv1_x, mv1_y), True)
-            if code == 0:
-                break
-        while game.get_available_moves():
-            mv2 = mcts_n(game, no, True, c)
-            print(mv2)
-
-            code = game.edge_play(mv2, False)
-            if code == 0:
-                break
-    return game.get_score()
-
-
-def play_mcts(game, is_maximising, no, c):
-    while game.get_available_moves():
-        mv2 = mcts_n(game, no, is_maximising, c)
-        code = game.edge_play(mv2, is_maximising)
+def return_board(board: List[List[int]], alg: str = None, move: tuple = None, iter_mcts: float = float('+inf'),
+                 time_mcts: float = float('+inf'), depth_minmax: int = None, ab: bool = True,
+                 player: str = "human"):
+    game = dots.DotsAndBoxes(board=board)
+    if player == "human":
+        if move not in game.get_available_moves():
+            return {"board": game.board, "score": game.get_score(), "current_player": "wrong_move"}
+        code = game.edge_play(move, True)
         if code == 0:
-            break
-
-
-def play_first_minmax(game, depth):
-    # ujemna punktacja - dla komputera
-    while game.get_available_moves():
-        while game.get_available_moves():
-            game.print_nice_board()
-            mv1_x = int(input())
-            mv1_y = int(input())
-            code = game.edge_play((mv1_x, mv1_y), True)
+            return {"board": game.board, "score": game.get_score(), "current_player": "bot"}
+        else:
+            return {"board": game.board, "score": game.get_score(), "current_player": "human"}
+    if player == "bot":
+        if alg == "MCTS":
+            move = mcts(game, False, 4, iter_mcts, time_mcts)
+            code = game.edge_play(move, False)
             if code == 0:
-                break
-        while game.get_available_moves():
-            mv2 = minmax(game, depth, False)[1]
-            print(mv2)
-            code = game.edge_play(mv2, False)
+                return {"board": game.board, "score": game.get_score(), "current_player": "human"}
+            else:
+                return {"board": game.board, "score": game.get_score(), "current_player": "bot"}
+        elif alg == "MINMAX":
+            move = minmax(game, depth_minmax, False, ab)[1]
+            code = game.edge_play(move, False)
             if code == 0:
-                break
-    return game.get_score()
+                return {"board": game.board, "score": game.get_score(), "current_player": "human"}
+            else:
+                return {"board": game.board, "score": game.get_score(), "current_player": "bot"}
+    else:
+        return {"board": game.board, "score": game.get_score(), "current_player": "err"}
 
 
-def play_second_minmax(game, depth):
-    # ujemna punktacja - dla komputera
-    while game.get_available_moves():
-        while game.get_available_moves():
-            mv2 = minmax(game, depth, False)[1]
-            print(mv2)
-            code = game.edge_play(mv2, False)
-            if code == 0:
-                break
-        while game.get_available_moves():
-            game.print_nice_board()
-            mv1_x = int(input())
-            mv1_y = int(input())
-            code = game.edge_play((mv1_x, mv1_y), True)
-            if code == 0:
-                break
-    return game.get_score()
+app = FastAPI()
 
 
-g = dots.DotsAndBoxes(5)
+@app.get("/")
+def root():
+    return {"Hello": "World"}
 
 
-print(play_first_mcts(g, 5000, 4.1))
+@app.put("/play")
+def get_board(
+    board: List[List[int]] = Body(...),
+    alg: str = Query(None),
+    move: List[int] = Body(None),
+    iter_mcts: float = Query(float('+inf')),
+    time_mcts: float = Query(float('+inf')),
+    depth_minmax: Optional[int] = Query(None),
+    ab: bool = Query(True),
+    player: str = Query("human")
+):
+    return return_board(board, alg, tuple(move), iter_mcts, time_mcts, depth_minmax, ab, player)
+
+
+@app.get("/reset")
+def get_clean_board(size: int = Query(...)):
+    game = dots.DotsAndBoxes(size)
+    return {"board": game.board, "score": game.get_score()}
