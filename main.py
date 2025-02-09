@@ -41,14 +41,14 @@ app = FastAPI()
 
 @app.put("/play")
 def get_board(
-    board: List[List[int]] = Body(...),
-    alg: str = Query(None),
-    move: List[int] = Body(None),
-    iter_mcts: float = Query(float('+inf')),
-    time_mcts: float = Query(float('+inf')),
-    depth_minmax: Optional[int] = Query(None),
-    ab: bool = Query(True),
-    player: str = Query("human")
+        board: List[List[int]] = Body(...),
+        alg: str = Query(None),
+        move: List[int] = Body(None),
+        iter_mcts: float = Query(float('+inf')),
+        time_mcts: float = Query(float('+inf')),
+        depth_minmax: Optional[int] = Query(None),
+        ab: bool = Query(True),
+        player: str = Query("human")
 ) -> Dict[str, Any]:
     return return_board(board, alg, tuple(move), iter_mcts, time_mcts, depth_minmax, ab, player)
 
