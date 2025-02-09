@@ -1,5 +1,6 @@
 import math
 import random
+import time
 
 
 def eval_simple(score):
@@ -72,12 +73,18 @@ def single_mcts(tree, eval_const):
     node['no_visits'] += 1
 
 
-def mcts_n(game, no, is_maximising, eval_const):
+def mcts(game, is_maximising, eval_const, no=float('+inf'), time_iter=float('+inf')):
     tree = [
         {'id': 0, 'parent': None, 'children': [], 'move_f_parent': None, 'p_sum': 0, 'gamestate': game, 'no_visits': 0,
          'is_maximising': is_maximising}]
-    for i in range(no):
+
+    if no == float('+inf') and time+iter == float('+inf'):
+        return None
+    t_end = time.time() + time_iter
+    i = 0
+    while i < no and time.time() < t_end:
         single_mcts(tree, eval_const)
+        i += 1
     # Find the best node:
     best_move_child = tree[max(tree[0]['children'], key=lambda a: tree[a]['no_visits'])]
     # print(tree[0])
