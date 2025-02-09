@@ -39,11 +39,6 @@ def return_board(board: List[List[int]], alg: str = None, move: tuple = None, it
 app = FastAPI()
 
 
-@app.get("/")
-def root():
-    return {"Hello": "World"}
-
-
 @app.put("/play")
 def get_board(
     board: List[List[int]] = Body(...),
