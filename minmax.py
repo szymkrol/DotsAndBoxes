@@ -2,7 +2,7 @@ import math
 import random
 
 
-def minmax(game, depth, is_maximising, alpha=-1000, beta=1000):
+def minmax(game, depth, is_maximising, alpha=-1000, beta=1000, ab=True):
     moves = game.get_available_moves().copy()
     # End node
     if depth == 0 or len(moves) == 0:
@@ -13,19 +13,20 @@ def minmax(game, depth, is_maximising, alpha=-1000, beta=1000):
         for move in moves:
             code = game.edge_play(move, is_maximising)
             if code == 1 or code == 2:  # Gained points - no player change
-                v_temp, p_move = minmax(game, depth - 1, is_maximising, alpha, beta)
+                v_temp, p_move = minmax(game, depth - 1, is_maximising, alpha, beta, ab)
             elif code == 0:  # Change of player
-                v_temp, p_move = minmax(game, depth - 1, not is_maximising, alpha, beta)
+                v_temp, p_move = minmax(game, depth - 1, not is_maximising, alpha, beta, ab)
             else:
                 print("Err")
             # Alpha/beta
-            if v_temp > value:
-                b_move = p_move
-                value = v_temp
-            alpha = max(alpha, value)
-            if beta <= alpha:
-                game.edge_unplay(move, is_maximising)
-                break
+            if ab:
+                if v_temp > value:
+                    b_move = p_move
+                    value = v_temp
+                alpha = max(alpha, value)
+                if beta <= alpha:
+                    game.edge_unplay(move, is_maximising)
+                    break
             game.edge_unplay(move, is_maximising)
         return value, b_move
     else:  # Minimising player
@@ -34,18 +35,19 @@ def minmax(game, depth, is_maximising, alpha=-1000, beta=1000):
         for move in moves:
             code = game.edge_play(move, is_maximising)
             if code == -1 or code == -2:  # Gained points - no player change
-                v_temp, p_move = minmax(game, depth - 1, is_maximising, alpha, beta)
+                v_temp, p_move = minmax(game, depth - 1, is_maximising, alpha, beta, ab)
             elif code == 0:  # Change of player
-                v_temp, p_move = minmax(game, depth - 1, not is_maximising, alpha, beta)
+                v_temp, p_move = minmax(game, depth - 1, not is_maximising, alpha, beta, ab)
             else:
                 print("Err")
             # Alpha/beta
-            if v_temp < value:
-                b_move = move
-                value = v_temp
-            beta = min(beta, value)
-            if beta <= alpha:
-                game.edge_unplay(move, is_maximising)
-                break
+            if ab:
+                if v_temp < value:
+                    b_move = move
+                    value = v_temp
+                beta = min(beta, value)
+                if beta <= alpha:
+                    game.edge_unplay(move, is_maximising)
+                    break
             game.edge_unplay(move, is_maximising)
         return value, b_move
