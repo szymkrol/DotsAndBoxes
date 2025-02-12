@@ -18,14 +18,14 @@ def return_board(board: List[List[int]], alg: str = None, move: tuple = None, it
         else:
             return {"board": game.board, "score": game.get_score(), "current_player": "human"}
     if player == "bot":
-        if alg == "MCTS":
+        if alg == "mcts":
             move = mcts(game, False, 4, iter_mcts, time_mcts)
             code = game.edge_play(move, False)
             if code == 0:
                 return {"board": game.board, "score": game.get_score(), "current_player": "human"}
             else:
                 return {"board": game.board, "score": game.get_score(), "current_player": "bot"}
-        elif alg == "MINMAX":
+        elif alg == "minmax":
             move = minmax(game, depth_minmax, False, ab)[1]
             code = game.edge_play(move, False)
             if code == 0:
